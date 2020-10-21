@@ -12,12 +12,6 @@ before_script:
 
 script:
   - python -m pip install -r requirements.txt
-  - mypy
-    --config-file src/mypy.ini test
-  - pylint
-    --rcfile=.pylintrc
-  - pytest
-    --cov-report=term
-    --cov-report=html
-    --pytest/
-    test
+  - mypy --config-file=src/mypy.ini src/ --html-report mypy
+  - pylint --rcfile=src/.pylintrc
+  - pytest --cov=test/ --cov-report=html --pytest
