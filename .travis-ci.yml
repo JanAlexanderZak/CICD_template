@@ -1,0 +1,23 @@
+language: python:3.7
+
+before_script:
+  - git tag -l
+  - git branch -avv
+  - git status
+  - git show -q
+  - env
+  - python --version
+  - which python
+  - python -m pip install --upgrade pip
+
+script:
+  - python -m pip install -r requirements.txt
+  - mypy
+    --config-file src/mypy.ini test
+  - pylint
+    --rcfile=.pylint
+  - pytest
+    --cov-report=term
+    --cov-report=html
+    --pytest-mypy-pylint/
+    test
