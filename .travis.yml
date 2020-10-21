@@ -15,9 +15,9 @@ script:
   - mypy
     --config-file src/mypy.ini test
   - pylint
-    --rcfile=.pylint
+    --rcfile=.pylintrc
   - pytest
     --cov-report=term
     --cov-report=html
-    --pytest-mypy-pylint/
+    --pytest/
     test
