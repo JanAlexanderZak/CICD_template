@@ -14,4 +14,7 @@ script:
   - python -m pip install -r requirements.txt
   - mypy --config-file=src/mypy.ini src/ --html-report mypy
   - pylint --rcfile=src/.pylintrc
-  - pytest --cov=test/ --cov-report=html --pytest
+  - pytest --cov=test/ --cov-report=html pytest/
+
+after_success:
+  - codecov
