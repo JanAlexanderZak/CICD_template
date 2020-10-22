@@ -20,6 +20,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-rmdir /s tests\mypy\html
-del tests\pytest\*.png
