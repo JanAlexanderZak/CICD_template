@@ -9,7 +9,6 @@ Lib
 tests/mypy
 tests/pytest
 
-
 # Files
 .coverage
 .installed.cfg
