@@ -6,6 +6,9 @@
 .egg-info
 python_venv
 Lib
+tests/mypy
+tests/pytest
+
 
 # Files
 .coverage
