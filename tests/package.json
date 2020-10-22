@@ -1,4 +1,9 @@
 {
-  "name": "mypy",
-  "status": "success"
+  "mypy": {
+    "status": "success"
+  },
+  "name": "status_descriptions",
+  "status_mypy": "success",
+  "status_pylint": "",
+  "status_pytest": "",
 }
