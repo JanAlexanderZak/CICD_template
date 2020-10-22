@@ -1,0 +1,13 @@
+{
+  "author": "Jan Alexander Zak",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vemarav/subdomains"
+  },
+  "pytest_description": "status_descriptions",
+  "status_pytest": "1 passed | 0 failed",
+  "mypy_description": "status_descriptions",
+  "status_mypy": "success",
+  "pylint_description": "status_descriptions",
+  "status_pylint": "10.0 / 10",
+}
