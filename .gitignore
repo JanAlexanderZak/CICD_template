@@ -1,1 +1,18 @@
+# Folders
 .idea
+.pytest_cache
+.mypy_cache
+**/__pycache__/
+.egg-info
+python_venv
+Lib
+
+# Files
+.coverage
+.installed.cfg
+*pyc
+*pyo
+
+# Dont ignore
+!.gitignore
+!.travis-ci.yml
