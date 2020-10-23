@@ -1,115 +1,64 @@
 """ Replaces script.bat """
 
 import subprocess
-import os
 import sys
 import re
 import json
 
 
-class PytestMypyPylintExecutable:
+class RunPytestMypyPylint:
     def __init__(self, argv):
+        # Run tests only
         if len(argv) == 0:
             self.output = False
             self.execute_cmd()
         if len(argv) == 1 and argv[0] == "--update":
             self.output = True
-            self.generate_shieldio_url()
-            self.update_package_json()
+            self.pytest, self.mypy, self.pylint = self.execute_cmd()
+            self.pytest_failed, self.pytest_passed, self.mypy_success, self.pylint_score = self.parse_cmd()
+
+            package_json = {
+                "pytest_description": "status_descriptions",
+                "status_pytest": f"{self.pytest_passed} passed | {self.pytest_failed} failed",
+                "mypy_description": "status_descriptions",
+                "status_mypy": f"{self.mypy_success}",
+                "pylint_description": "status_descriptions",
+                "status_pylint": f"{self.pylint_score}",
+                "author": "Jan Alexander Zak",
+                "repository": {
+                    "type": "git",
+                    "url": "https://github.com/janalexanderzak"
+                }
+            }
+            self.update_package_json(package_json)
+
+            shieldio_dict = {
+                "pytest_color": "brightgreen",
+                "pytest_label": "pytest",
+                "pytest_query": "status_pytest",
+                "mypy_color": "brightgreen",
+                "mypy_label": "mypy",
+                "mypy_query": "status_mypy",
+                "pylint_color": "brightgreen",
+                "pylint_label": "pylint",
+                "pylint_query": "status_pylint",
+            }
+            self.generate_shieldio_url(shieldio_dict)
         else:
             print("Too many arguments")
 
-    def parse_cmd(self):
-        pytest, mypy, pylint = self.execute_cmd()
-
-        # Pytest
-        try:
-            pytest_failed = int(re.search(".{3}(?:failed)", pytest).group()[:-6].strip())
-        except:
-            pytest_failed = 0
-        try:
-            pytest_passed = int(re.search(".{3}(?:passed)", pytest).group()[:-6].strip())
-        except:
-            pytest_passed = 0
-        print("Pytest failed: ", pytest_failed)
-        print("Pytest passed: ", pytest_passed)
-
-        # Mypy
-        mypy_success = re.search("Success", mypy).group().strip()
-        print("Mypy success: ", mypy_success)
-
-        # Pylint
-        pylint_score = re.search(".{11}(?:(previous))", pylint).group()[:-9].strip()
-        print("pylint score: ", pylint_score)
-
-        return pytest_failed, pytest_passed, mypy_success, pylint_score
-
-    def update_package_json(self):
-        pytest_failed, pytest_passed, mypy_success, pylint_score = self.parse_cmd()
-
-        package_json_dict = {
-            "pytest_description": "status_descriptions",
-            "status_pytest": f"{pytest_passed} passed | {pytest_failed} failed",
-            "mypy_description": "status_descriptions",
-            "status_mypy": f"{mypy_success}",
-            "pylint_description": "status_descriptions",
-            "status_pylint": f"{pylint_score}",
-            "author": "Jan Alexander Zak",
-            "repository": {
-                "type": "git",
-                "url": "https://github.com/janalexanderzak"
-            }
-        }
-
-        # TODO: Does it really have to be named package.json?
-        with open('tests/package.json', 'w') as out_file:
-            json.dump(package_json_dict, out_file)
-
-    def generate_shieldio_url(self):
-        # Fixed for all
-        url = "https%3A%2F%2Fraw.githubusercontent.com%2FJanAlexanderZak%2Fneural_network%2Fmaster%2Ftests%2Fpackage.json"
-        pytest_failed, pytest_passed, mypy_success, pylint_score = self.parse_cmd()
-        print(pytest_failed)
-        # Pytest
-        if pytest_failed >= 1:
-            pytest_color = "red"
-        else:
-            pytest_color = "brightgreen"
-        pytest_label = "pytest"
-        pytest_query = "status_pytest"
-        pytest_url = f"![Build Status](https://img.shields.io/badge/dynamic/json?color={pytest_color}&label={pytest_label}&query={pytest_query}&url={url})"
-
-        if mypy_success != "Success":
-            mypy_color = "red"
-        else:
-            mypy_color = "brightgreen"
-        mypy_label = "pylint"
-        mypy_query = "status_mypy"
-        mypy_url = f"![Build Status](https://img.shields.io/badge/dynamic/json?color={mypy_color}&label={mypy_label}&query={mypy_query}&url={url})"
-
-
-        # Pylint
-        if float(pylint_score[0:5]) < 5:
-            pylint_color = "red"
-        else:
-            pylint_color = "brightgreen"
-        pylint_label = "pylint"
-        pylint_query = "status_pylint"
-        pylint_url = f"![Build Status](https://img.shields.io/badge/dynamic/json?color={pylint_color}&label={pylint_label}&query={pylint_query}&url={url})"
-
-        with open("README.md", 'r') as f:
-            text = f.readlines()
-
-        text[text.index('pytest  \n') + 1] = f"{pytest_url}\n"
-        text[text.index('mypy  \n') + 1] = f"{mypy_url}\n"
-        text[text.index('pylint  \n') + 1] = f"{pylint_url}\n"
-        text = "".join(text)
-
-        with open("README.md", 'w') as f:
-            f.write(text)
-
-    def update_badge(self):
-        pass
+    def execute_cmd(self):
+        pytest_output = self.check_validity_of_command(
+            "pytest --cov=tests --cov-report=html:tests/pytest tests",
+            output=self.output)
+        mypy_output = self.check_validity_of_command(
+            "mypy --config-file=tests/mypy.ini src/ --html-report tests/mypy",
+            output=self.output)
+        pylint_output = self.check_validity_of_command(
+            "pylint --rcfile=tests/.pylintrc src/",
+            output=self.output)
+        if self.output:
+            return pytest_output.stdout.decode(), mypy_output.stdout.decode(), str(pylint_output.stdout)
 
     @staticmethod
     def check_validity_of_command(cmd: str, output: bool) -> subprocess.CompletedProcess:
@@ -122,14 +71,63 @@ class PytestMypyPylintExecutable:
         except (FileNotFoundError, subprocess.CalledProcessError) as e:
             print(e)
 
-    def execute_cmd(self):
-        pytest_output = self.check_validity_of_command("pytest --cov=tests --cov-report=html:tests/pytest tests", output=self.output)
-        mypy_output = self.check_validity_of_command("mypy --config-file=tests/mypy.ini src/ --html-report tests/mypy", output=self.output)
-        pylint_output = self.check_validity_of_command("pylint --rcfile=tests/.pylintrc src/", output=self.output)
+    def parse_cmd(self):
+        # Pytest
+        re_fail = re.search(".{3}(?:failed)", self.pytest)
+        re_pass = re.search(".{3}(?:passed)", self.pytest)
+        pytest_failed = int(re_fail.group()[:-6].strip()) if re_fail is not None else 0
+        pytest_passed = int(re_pass.group()[:-6].strip()) if re_pass is not None else 0
 
-        if self.output:
-            return pytest_output.stdout.decode(), mypy_output.stdout.decode(), str(pylint_output.stdout)
+        # Mypy
+        mypy_success = re.search("Success", self.mypy).group().strip()
+
+        # Pylint
+        pylint_score = re.search(".{11}(?:(previous))", self.pylint).group()[:-9].strip()
+
+        return pytest_failed, pytest_passed, mypy_success, pylint_score
+
+    def update_package_json(self, package_json):
+        # TODO: Does it really have to be named package.json?
+        with open('tests/package.json', 'w') as out_file:
+            json.dump(package_json, out_file)
+
+    def generate_shieldio_url(self, shieldio_dict):
+        # Fixed for all
+        url = "https%3A%2F%2Fraw.githubusercontent.com%2FJanAlexanderZak%2Fneural_network%2Fmaster%2Ftests%2Fpackage.json"
+        with open("README.md", 'r') as f:
+            text = f.readlines()
+
+        # Pytest
+        shieldio_dict["pytest_color"] = "red" if self.pytest_failed >= 1 else "brightgreen"
+        pytest_url = "![Build Status](https://img.shields.io/badge/dynamic/json?color={}&label={}&query={}&url={})".format(
+            shieldio_dict['pytest_color'],
+            shieldio_dict['pytest_label'],
+            shieldio_dict['pytest_query'],
+            url)
+        text[text.index('pytest  \n') + 1] = f"{pytest_url}\n"
+
+        # Mypy
+        shieldio_dict["mypy_color"] = "red" if self.mypy_success != "Success" else "brightgreen"
+        mypy_url = "![Build Status](https://img.shields.io/badge/dynamic/json?color={}&label={}&query={}&url={})".format(
+            shieldio_dict['mypy_color'],
+            shieldio_dict['mypy_label'],
+            shieldio_dict['mypy_query'],
+            url)
+        text[text.index('mypy  \n') + 1] = f"{mypy_url}\n"
+
+        # Pylint
+        shieldio_dict["mypy_color"] = "red" if float(self.pylint_score[0:5]) < 5 else "brightgreen"
+        pylint_url = "![Build Status](https://img.shields.io/badge/dynamic/json?color={}&label={}&query={}&url={})".format(
+            shieldio_dict['pylint_color'],
+            shieldio_dict['pylint_label'],
+            shieldio_dict['pylint_query'],
+            url)
+        text[text.index('pylint  \n') + 1] = f"{pylint_url}\n"
+
+        text = "".join(text)
+        with open("README.md", 'w') as f:
+            f.write(text)
 
 
 if __name__ == "__main__":
-    instance = PytestMypyPylintExecutable(sys.argv[1:])
+    instance = RunPytestMypyPylint(sys.argv[1:])
