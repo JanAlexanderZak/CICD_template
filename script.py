@@ -15,6 +15,7 @@ class PytestMypyPylintExecutable:
         if len(argv) == 1 and argv[0] == "--update":
             self.output = True
             self.generate_shieldio_url()
+            self.update_package_json()
         else:
             print("Too many arguments")
 
@@ -55,7 +56,7 @@ class PytestMypyPylintExecutable:
         }
 
         # TODO: Does it really have to be named package.json?
-        with open('package.json', 'w') as out_file:
+        with open('tests/package.json', 'w') as out_file:
             json.dump(package_json_dict, out_file)
 
     def generate_shieldio_url(self):
