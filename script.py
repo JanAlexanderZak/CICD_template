@@ -7,11 +7,6 @@ import re
 import json
 
 
-# check sys.argv
-# run normal tests or update package.json
-# update readme shield link color
-
-
 class PytestMypyPylintExecutable:
     def __init__(self, argv):
         if len(argv) == 0:
