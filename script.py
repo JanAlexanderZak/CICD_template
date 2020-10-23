@@ -23,8 +23,14 @@ class PytestMypyPylintExecutable:
         pytest, mypy, pylint = self.execute_cmd()
 
         # Pytest
-        pytest_failed = int(re.search(".{3}(?:failed)", pytest).group()[:-6].strip())
-        pytest_passed = int(re.search(".{3}(?:passed)", pytest).group()[:-6].strip())
+        try:
+            pytest_failed = int(re.search(".{3}(?:failed)", pytest).group()[:-6].strip())
+        except:
+            pytest_failed = 0
+        try:
+            pytest_passed = int(re.search(".{3}(?:passed)", pytest).group()[:-6].strip())
+        except:
+            pytest_passed = 0
         print("Pytest failed: ", pytest_failed)
         print("Pytest passed: ", pytest_passed)
 
@@ -78,7 +84,7 @@ class PytestMypyPylintExecutable:
         else:
             mypy_color = "brightgreen"
         mypy_label = "pylint"
-        mypy_query = "status_pylint"
+        mypy_query = "status_mypy"
         mypy_url = f"![Build Status](https://img.shields.io/badge/dynamic/json?color={mypy_color}&label={mypy_label}&query={mypy_query}&url={url})"
 
 
@@ -86,7 +92,7 @@ class PytestMypyPylintExecutable:
         if float(pylint_score[0:5]) < 5:
             pylint_color = "red"
         else:
-            pylint_color = "red"
+            pylint_color = "brightgreen"
         pylint_label = "pylint"
         pylint_query = "status_pylint"
         pylint_url = f"![Build Status](https://img.shields.io/badge/dynamic/json?color={pylint_color}&label={pylint_label}&query={pylint_query}&url={url})"
