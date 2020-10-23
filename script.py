@@ -62,9 +62,9 @@ class PytestMypyPylintExecutable:
         # Fixed for all
         url = "https%3A%2F%2Fraw.githubusercontent.com%2FJanAlexanderZak%2Fneural_network%2Fmaster%2Ftests%2Fpackage.json"
         pytest_failed, pytest_passed, mypy_success, pylint_score = self.parse_cmd()
-
+        print(pytest_failed)
         # Pytest
-        if pytest_failed > 1:
+        if pytest_failed >= 1:
             pytest_color = "red"
         else:
             pytest_color = "brightgreen"
@@ -85,7 +85,7 @@ class PytestMypyPylintExecutable:
         if float(pylint_score[0:5]) < 5:
             pylint_color = "red"
         else:
-            pylint_color = "brightgreen"
+            pylint_color = "red"
         pylint_label = "pylint"
         pylint_query = "status_pylint"
         pylint_url = f"![Build Status](https://img.shields.io/badge/dynamic/json?color={pylint_color}&label={pylint_label}&query={pylint_query}&url={url})"
