@@ -55,7 +55,7 @@ class RunPytestMypyPylint:
             "mypy --config-file=tests/mypy.ini src/ --html-report tests/mypy",
             output=self.output)
         pylint_output = self.check_validity_of_command(
-            "pylint --rcfile=.pylintrc src/",
+            "pylint --rcfile=tests/.pylintrc src/",
             output=self.output)
         if self.output:
             return pytest_output.stdout.decode(), mypy_output.stdout.decode(), str(pylint_output.stdout)
@@ -88,13 +88,13 @@ class RunPytestMypyPylint:
 
     def update_package_json(self, package_json):
         # TODO: Does it really have to be named package.json?
-        with open('tests/package.json', 'w') as out_file:
+        with open('package.json', 'w') as out_file:
             json.dump(package_json, out_file)
 
     def generate_shieldio_url(self, shieldio_dict):
         # Fixed for all
         url = "https%3A%2F%2Fraw.githubusercontent.com%2FJanAlexanderZak%2Fneural_network%2Fmaster%2Ftests%2Fpackage.json"
-        with open("README.md", 'r') as f:
+        with open("../README.md", 'r') as f:
             text = f.readlines()
 
         # Pytest
@@ -125,7 +125,7 @@ class RunPytestMypyPylint:
         text[text.index('pylint  \n') + 1] = f"{pylint_url}\n"
 
         text = "".join(text)
-        with open("README.md", 'w') as f:
+        with open("../README.md", 'w') as f:
             f.write(text)
 
 
