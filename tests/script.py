@@ -53,7 +53,7 @@ class RunPytestMypyPylint:
             "pytest --cov=tests --cov-report=html:tests/pytest tests",
             output=self.output)
         mypy_output = self.check_validity_of_command(
-            "mypy --config-file=tests/mypy.ini src/ --html-report tests/mypy",
+            "mypy --config-file=tests/mypy.ini src/ --html-report /mypy",
             output=self.output)
         pylint_output = self.check_validity_of_command(
             "pylint --rcfile=tests/.pylintrc src/",
