@@ -8,3 +8,4 @@ pytest-cov==2.10.1
 pytest-doctestplus==0.4.0
 pytest-openfiles==0.4.0
 pytest-remotedata==0.3.2
+lxml==4.6.1
