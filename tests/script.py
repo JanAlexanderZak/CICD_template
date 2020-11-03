@@ -4,6 +4,7 @@ import subprocess
 import sys
 import re
 import json
+import os
 
 
 class RunPytestMypyPylint:
@@ -86,15 +87,16 @@ class RunPytestMypyPylint:
 
         return pytest_failed, pytest_passed, mypy_success, pylint_score
 
-    def update_package_json(self, package_json):
+    @staticmethod
+    def update_package_json(package_json):
         # TODO: Does it really have to be named package.json?
-        with open('package.json', 'w') as out_file:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), 'package.json')), 'w') as out_file:
             json.dump(package_json, out_file)
 
     def generate_shieldio_url(self, shieldio_dict):
         # Fixed for all
-        url = "https%3A%2F%2Fraw.githubusercontent.com%2FJanAlexanderZak%2Fneural_network%2Fmaster%2Ftests%2Fpackage.json"
-        with open("../README.md", 'r') as f:
+        url = "https%3A%2F%2Fraw.githubusercontent.com%2FJanAlexanderZak%2Fcicd_template%2Fmaster%2Ftests%2Fpackage.json"
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'README.md')), 'r') as f:
             text = f.readlines()
 
         # Pytest
@@ -125,7 +127,7 @@ class RunPytestMypyPylint:
         text[text.index('pylint  \n') + 1] = f"{pylint_url}\n"
 
         text = "".join(text)
-        with open("../README.md", 'w') as f:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'README.md')), 'w') as f:
             f.write(text)
 
 
